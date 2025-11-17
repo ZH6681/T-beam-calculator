@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T形独立梁截面计算程序</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .content-section {
+            display: none;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .result-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-label {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .result-value {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .material-params {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .material-param {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .param-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+        
+        .param-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .canvas-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        canvas {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-drawing-btn {
+            background-color: var(--success-color);
+            margin-top: 20px;
+        }
+        
+        .section-drawing-btn:hover {
+            background-color: #219653;
+        }
+        
+        .safety-result {
+            text-align: center;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .safe {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
+        }
+        
+        .unsafe {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+        }
+        
+        .rebar-selection {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .rebar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .rebar-table th, .rebar-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .rebar-table th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .rebar-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .rebar-table tr:hover {
+            background-color: #e9f7fe;
+        }
+        
+        .selected-rebar {
+            background-color: #d4edda !important;
+            font-weight: bold;
+        }
+        
+        .rebar-option {
+            cursor: pointer;
+        }
+        
+        .rebar-option:hover {
+            background-color: #e9f7fe;
+        }
+        
+        @media (max-width: 768px) {
+            .input-row {
+                flex-direction: column;
+            }
+            
+            .input-field {
+                min-width: 100%;
+            }
+            
+            .material-params {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .rebar-table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>T形独立梁截面计算程序</h1>
+            <p>钢筋混凝土T形梁截面受弯计算与配筋设计</p>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="material">材料选择</div>
+            <div class="tab" data-tab="reinforcement">配筋计算</div>
+            <div class="tab" data-tab="capacity">承载力复核</div>
+        </div>
+        
+        <!-- 材料选择部分 -->
+        <section id="material" class="content-section active">
+            <h2 class="section-title">材料类型选择</h2>
+            
+            <div class="input-group">
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="concrete-type">混凝土类型</label>
+                        <select id="concrete-type">
+                            <option value="C15">C15</option>
+                            <option value="C20">C20</option>
+                            <option value="C25" selected>C25</option>
+                            <option value="C30">C30</option>
+                            <option value="C35">C35</option>
+                            <option value="C40">C40</option>
+                            <option value="C45">C45</option>
+                            <option value="C50">C50</option>
+                            <option value="C55">C55</option>
+                            <option value="C60">C60</option>
+                            <option value="C65">C65</option>
+                            <option value="C70">C70</option>
+                            <option value="C75">C75</option>
+                            <option value="C80">C80</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="steel-type">钢筋类型</label>
+                        <select id="steel-type">
+                            <option value="HPB300">HPB300</option>
+                            <option value="HRB335" selected>HRB335</option>
+                            <option value="HRB400">HRB400</option>
+                            <option value="HRBF400">HRBF400</option>
+                            <option value="RRB400">RRB400</option>
+                            <option value="HRB500">HRB500</option>
+                            <option value="HRBF500">HRBF500</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="material-params">
+                <div class="material-param">
+                    <div class="param-label">混凝土抗压强度设计值 fc</div>
+                    <div class="param-value" id="fc-value">11.9 N/mm²</div>
+                </div>
+                
+                <div class="material-param">
+                    <div class="param-label">钢筋抗拉强度设计值 fy</div>
+                    <div class="param-value" id="fy-value">300 N/mm²</div>
+                </div>
+                
+                <div class="material-param">
+                    <div class="param-label">相对界限受压区高度 ξb</div>
+                    <div class="param-value" id="xib-value">0.550</div>
+                </div>
+            </div>
+            
+            <button id="update-material">更新材料参数</button>
+        </section>
+        
+        <!-- 配筋计算部分 -->
+        <section id="reinforcement" class="content-section">
+            <h2 class="section-title">T形独立梁截面受弯构件配筋计算</h2>
+            
+            <div class="input-group">
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="b-rein">梁宽 b (mm)</label>
+                        <input type="number" id="b-rein" placeholder="300" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="h-rein">梁高 h (mm)</label>
+                        <input type="number" id="h-rein" placeholder="700" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="l0-rein">计算跨度 L0 (mm)</label>
+                        <input type="number" id="l0-rein" placeholder="6000" class="enter-next">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="bf-rein">实有宽度 b'f (mm)</label>
+                        <input type="number" id="bf-rein" placeholder="800" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="hf-rein">翼缘高度 h'f (mm)</label>
+                        <input type="number" id="hf-rein" placeholder="200" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="gam-rein">结构系数 γd</label>
+                        <input type="number" id="gam-rein" step="0.1" placeholder="1.0" class="enter-next">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="M-rein">弯矩设计值 M (kN·m)</label>
+                        <input type="number" id="M-rein" placeholder="200" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="as0-rein">计算保护层厚度 as (mm)</label>
+                        <input type="number" id="as0-rein" placeholder="50" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="rho-min">最小配筋率 ρmin</label>
+                        <input type="number" id="rho-min" step="0.001" placeholder="0.002" class="enter-next">
+                    </div>
+                </div>
+            </div>
+            
+            <button id="calculate-reinforcement">计算配筋</button>
+            
+            <div class="result-section">
+                <h3>计算结果</h3>
+                
+                <div class="result-row">
+                    <div class="result-label">T形截面类型</div>
+                    <div class="result-value" id="ls-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">b'f</div>
+                    <div class="result-value" id="bf-out-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">h0</div>
+                    <div class="result-value" id="h0-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">αs</div>
+                    <div class="result-value" id="alpha-s-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">ξ</div>
+                    <div class="result-value" id="xi-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">x</div>
+                    <div class="result-value" id="x-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">As (mm²)</div>
+                    <div class="result-value" id="As-rein">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">ρ</div>
+                    <div class="result-value" id="rho-rein">---</div>
+                </div>
+            </div>
+            
+            <div class="rebar-selection" id="rebar-selection" style="display: none;">
+                <h3>钢筋选择结果</h3>
+                
+                <div class="result-row">
+                    <div class="result-label">选择钢筋</div>
+                    <div class="result-value" id="selected-rebar-text">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">实配钢筋面积 (mm²)</div>
+                    <div class="result-value" id="actual-area">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">计算钢筋面积 (mm²)</div>
+                    <div class="result-value" id="calc-area">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">差值</div>
+                    <div class="result-value" id="area-diff">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">最小净间距 (mm)</div>
+                    <div class="result-value" id="min-spacing">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">配筋方式</div>
+                    <div class="result-value" id="layer-type">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">净间距检查</div>
+                    <div class="result-value" id="spacing-check">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">面积检查</div>
+                    <div class="result-value" id="area-check">---</div>
+                </div>
+                
+                <h4 style="margin-top: 20px;">钢筋数据表</h4>
+                <table class="rebar-table" id="rebar-table">
+                    <thead>
+                        <tr>
+                            <th>公称直径 (mm)</th>
+                            <th>公称截面积 (mm²)</th>
+                            <th>选择</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 钢筋数据将通过JavaScript填充 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <button class="section-drawing-btn" id="show-section-rein" style="display: none;">显示截面配筋图</button>
+            
+            <div class="canvas-container">
+                <canvas id="section-canvas-rein" width="800" height="500"></canvas>
+            </div>
+        </section>
+        
+        <!-- 承载力复核部分 -->
+        <section id="capacity" class="content-section">
+            <h2 class="section-title">T形独立梁截面受弯承载力复核</h2>
+            
+            <div class="input-group">
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="b-cap">梁宽 b (mm)</label>
+                        <input type="number" id="b-cap" placeholder="300" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="h-cap">梁高 h (mm)</label>
+                        <input type="number" id="h-cap" placeholder="700" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="l0-cap">计算跨度 L0 (mm)</label>
+                        <input type="number" id="l0-cap" placeholder="6000" class="enter-next">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="bf-cap">实有宽度 b'f (mm)</label>
+                        <input type="number" id="bf-cap" placeholder="800" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="hf-cap">翼缘高度 h'f (mm)</label>
+                        <input type="number" id="hf-cap" placeholder="200" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="gam-cap">结构系数 γd</label>
+                        <input type="number" id="gam-cap" step="0.1" placeholder="1.0" class="enter-next">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="M-cap">弯矩设计值 M (kN·m)</label>
+                        <input type="number" id="M-cap" placeholder="200" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="as-cap">计算保护层厚度 as (mm)</label>
+                        <input type="number" id="as-cap" placeholder="50" class="enter-next">
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="As-cap">现配钢筋面积 As (mm²)</label>
+                        <input type="number" id="As-cap" placeholder="1500" class="enter-next">
+                    </div>
+                </div>
+            </div>
+            
+            <button id="check-capacity">复核承载力</button>
+            
+            <div class="result-section">
+                <h3>复核结果</h3>
+                
+                <div class="result-row">
+                    <div class="result-label">T形截面类型</div>
+                    <div class="result-value" id="ls-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">b'f</div>
+                    <div class="result-value" id="bf-out-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">h0</div>
+                    <div class="result-value" id="h0-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">αs</div>
+                    <div class="result-value" id="alpha-s-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">ξ</div>
+                    <div class="result-value" id="xi-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">x</div>
+                    <div class="result-value" id="x-cap">---</div>
+                </div>
+                
+                <div class="result-row">
+                    <div class="result-label">Mu (kN·m)</div>
+                    <div class="result-value" id="Mu-cap">---</div>
+                </div>
+            </div>
+            
+            <div id="safety-result" class="safety-result">
+                截面安全性复核结果: ---
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 材料参数数据
+        const materialData = {
+            fc: {
+                "C15": 7.2, "C20": 9.6, "C25": 11.9, "C30": 14.3, "C35": 16.7,
+                "C40": 19.1, "C45": 21.1, "C50": 23.1, "C55": 25.3, "C60": 27.5,
+                "C65": 29.7, "C70": 31.8, "C75": 33.8, "C80": 35.9
+            },
+            fy: {
+                "HPB300": 270, "HRB335": 300, "HRB400": 360, "HRBF400": 360,
+                "RRB400": 360, "HRB500": 435, "HRBF500": 435
+            },
+            xib: {
+                // C15-C50
+                "C15-HPB300": 0.576, "C15-HRB335": 0.550, "C15-HRB400": 0.518, "C15-HRBF400": 0.518,
+                "C15-RRB400": 0.518, "C15-HRB500": 0.482, "C15-HRBF500": 0.482,
+                "C20-HPB300": 0.576, "C20-HRB335": 0.550, "C20-HRB400": 0.518, "C20-HRBF400": 0.518,
+                "C20-RRB400": 0.518, "C20-HRB500": 0.482, "C20-HRBF500": 0.482,
+                "C25-HPB300": 0.576, "C25-HRB335": 0.550, "C25-HRB400": 0.518, "C25-HRBF400": 0.518,
+                "C25-RRB400": 0.518, "C25-HRB500": 0.482, "C25-HRBF500": 0.482,
+                "C30-HPB300": 0.576, "C30-HRB335": 0.550, "C30-HRB400": 0.518, "C30-HRBF400": 0.518,
+                "C30-RRB400": 0.518, "C30-HRB500": 0.482, "C30-HRBF500": 0.482,
+                "C35-HPB300": 0.576, "C35-HRB335": 0.550, "C35-HRB400": 0.518, "C35-HRBF400": 0.518,
+                "C35-RRB400": 0.518, "C35-HRB500": 0.482, "C35-HRBF500": 0.482,
+                "C40-HPB300": 0.576, "C40-HRB335": 0.550, "C40-HRB400": 0.518, "C40-HRBF400": 0.518,
+                "C40-RRB400": 0.518, "C40-HRB500": 0.482, "C40-HRBF500": 0.482,
+                "C45-HPB300": 0.576, "C45-HRB335": 0.550, "C45-HRB400": 0.518, "C45-HRBF400": 0.518,
+                "C45-RRB400": 0.518, "C45-HRB500": 0.482, "C45-HRBF500": 0.482,
+                "C50-HPB300": 0.576, "C50-HRB335": 0.550, "C50-HRB400": 0.518, "C50-HRBF400": 0.518,
+                "C50-RRB400": 0.518, "C50-HRB500": 0.482, "C50-HRBF500": 0.482,
+                // C55
+                "C55-HPB300": 0.566, "C55-HRB335": 0.541, "C55-HRB400": 0.508, "C55-HRBF400": 0.508,
+                "C55-RRB400": 0.508, "C55-HRB500": 0.473, "C55-HRBF500": 0.473,
+                // C60
+                "C60-HPB300": 0.556, "C60-HRB335": 0.531, "C60-HRB400": 0.499, "C60-HRBF400": 0.499,
+                "C60-RRB400": 0.499, "C60-HRB500": 0.464, "C60-HRBF500": 0.464,
+                // C65
+                "C65-HPB300": 0.547, "C65-HRB335": 0.522, "C65-HRB400": 0.490, "C65-HRBF400": 0.490,
+                "C65-RRB400": 0.490, "C65-HRB500": 0.455, "C65-HRBF500": 0.455,
+                // C70
+                "C70-HPB300": 0.537, "C70-HRB335": 0.512, "C70-HRB400": 0.481, "C70-HRBF400": 0.481,
+                "C70-RRB400": 0.481, "C70-HRB500": 0.447, "C70-HRBF500": 0.447,
+                // C75
+                "C75-HPB300": 0.528, "C75-HRB335": 0.503, "C75-HRB400": 0.472, "C75-HRBF400": 0.472,
+                "C75-RRB400": 0.472, "C75-HRB500": 0.438, "C75-HRBF500": 0.438,
+                // C80
+                "C80-HPB300": 0.518, "C80-HRB335": 0.493, "C80-HRB400": 0.463, "C80-HRBF400": 0.463,
+                "C80-RRB400": 0.463, "C80-HRB500": 0.429, "C80-HRBF500": 0.429,
+            }
+        };
+
+        // 钢筋数据表
+        const rebarData = {
+            6: { area: 28.3 },
+            8: { area: 50.3 },
+            10: { area: 78.5 },
+            12: { area: 113.1 },
+            14: { area: 153.9 },
+            16: { area: 201.1 },
+            18: { area: 254.5 },
+            20: { area: 314.2 },
+            22: { area: 380.1 },
+            25: { area: 490.9 },
+            28: { area: 615.8 },
+            32: { area: 804.2 },
+            36: { area: 1017.9 },
+            40: { area: 1256.6 },
+            50: { area: 1964.0 }
+        };
+
+        // 当前材料参数
+        let currentFc = 11.9;
+        let currentFy = 300;
+        let currentXib = 0.550;
+
+        // 当前截面参数
+        let sectionParams = {
+            b: 300,
+            h: 700,
+            b_f: 800,
+            h_f: 200,
+            as0: 50,
+            As: 0
+        };
+
+        // 选择的钢筋信息
+        let selectedRebar = {
+            diameter: 0,
+            number: 0,
+            actualArea: 0,
+            double_layer: false,
+            mixed_diameter: false,
+            diameter1: 0,
+            number1: 0,
+            diameter2: 0,
+            number2: 0,
+            diameter_lower: 0,
+            number_lower: 0,
+            diameter_upper: 0,
+            number_upper: 0
+        };
+
+        // 选项卡切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有活动状态
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                
+                // 添加当前活动状态
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // 回车键跳转功能
+        document.querySelectorAll('.enter-next').forEach((input, index, inputs) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextIndex = index + 1;
+                    if (nextIndex < inputs.length) {
+                        inputs[nextIndex].focus();
+                    } else {
+                        // 如果是最后一个输入框，则触发计算按钮
+                        const activeSection = document.querySelector('.content-section.active').id;
+                        if (activeSection === 'reinforcement') {
+                            document.getElementById('calculate-reinforcement').click();
+                        } else if (activeSection === 'capacity') {
+                            document.getElementById('check-capacity').click();
+                        }
+                    }
+                }
+            });
+        });
+
+        // 更新材料参数
+        document.getElementById('update-material').addEventListener('click', updateMaterialValues);
+        
+        // 初始化时更新材料参数
+        updateMaterialValues();
+
+        function updateMaterialValues() {
+            const concreteType = document.getElementById('concrete-type').value;
+            const steelType = document.getElementById('steel-type').value;
+            
+            // 更新fc值
+            currentFc = materialData.fc[concreteType];
+            document.getElementById('fc-value').textContent = `${currentFc} N/mm²`;
+            
+            // 更新fy值
+            currentFy = materialData.fy[steelType];
+            document.getElementById('fy-value').textContent = `${currentFy} N/mm²`;
+            
+            // 更新ξb值
+            const key = `${concreteType}-${steelType}`;
+            currentXib = materialData.xib[key] || 0.550;
+            document.getElementById('xib-value').textContent = currentXib;
+        }
+
+        // 配筋计算功能
+        document.getElementById('calculate-reinforcement').addEventListener('click', calculateReinforcement);
+
+        function calculateReinforcement() {
+            try {
+                // 获取输入值
+                const b = parseFloat(document.getElementById('b-rein').value) || 0;
+                const h = parseFloat(document.getElementById('h-rein').value) || 0;
+                const b_f = parseFloat(document.getElementById('bf-rein').value) || 0;
+                const h_f = parseFloat(document.getElementById('hf-rein').value) || 0;
+                const gam = parseFloat(document.getElementById('gam-rein').value) || 1.0;
+                const M = parseFloat(document.getElementById('M-rein').value) || 0;
+                const as0 = parseFloat(document.getElementById('as0-rein').value) || 0;
+                const rho_min = parseFloat(document.getElementById('rho-min').value) || 0.002;
+                const L0 = parseFloat(document.getElementById('l0-rein').value) || 6000;
+
+                // 检查输入完整性
+                if (!b || !h || !b_f || !h_f || !M || !as0) {
+                    alert('请填写所有必填参数');
+                    return;
+                }
+
+                // 计算h0 = h - as0
+                const h0 = h - as0;
+
+                // 确定翼缘宽度
+                const ratio = h_f / h0;
+                let b_f1;
+
+                if (ratio >= 0.1) {
+                    b_f1 = b + 12 * h_f;
+                } else if (ratio >= 0.05) {
+                    b_f1 = b + 6 * h_f;
+                } else {
+                    b_f1 = b;
+                }
+
+                // 计算b_f2
+                const b_f2 = L0 / 3;
+
+                // 取b_f, b_f1, b_f2中最小的值作为b_f0
+                const b_f0 = Math.min(b_f, b_f1, b_f2);
+                const b_f_out = b_f0; // 输出翼缘宽度
+
+                // 判断T形梁截面类型
+                const gam_M = gam * M * 1e6;
+                const fc_value = currentFc * b_f0 * h_f * (h0 - h_f / 2);
+
+                let ls, alpha_s, xi, x, As, rho;
+
+                // 比较大小
+                if (gam_M <= fc_value) {
+                    // 第一种T形截面（受压区高度在翼缘内）
+                    ls = "第一种T形截面";
+
+                    // 计算alpha_s
+                    alpha_s = gam_M / (currentFc * b_f0 * h0 * h0);
+
+                    // 计算xi
+                    xi = 1 - Math.sqrt(1 - 2 * alpha_s);
+
+                    // 计算x
+                    x = xi * h0;
+
+                    // 计算As
+                    As = currentFc * b_f0 * xi * h0 / currentFy;
+
+                    // 计算rho
+                    rho = As / (b * h0);
+
+                    // 检查最小配筋率
+                    if (rho < rho_min) {
+                        As = (b * h0) * rho_min;
+                        rho = rho_min;
+                    }
+                } else {
+                    // 第二种T形截面（受压区高度进入腹板）
+                    ls = "第二种T形截面";
+
+                    // 计算alpha_s
+                    alpha_s = (gam_M - currentFc * (b_f0 - b) * h_f * (h0 - h_f / 2)) / (currentFc * b * h0 * h0);
+
+                    // 计算xi
+                    xi = 1 - Math.sqrt(1 - 2 * alpha_s);
+
+                    // 比较xi和xi_b大小
+                    if (xi > currentXib) {
+                        xi = currentXib; // 如果xi大于xi_b，则取xi_b
+                    }
+
+                    // 计算x
+                    x = xi * h0;
+
+                    // 计算As
+                    As = (currentFc * b * xi * h0 + currentFc * (b_f0 - b) * h_f) / currentFy;
+
+                    // 计算rho
+                    rho = As / (b * h0);
+
+                    // 检查最小配筋率
+                    if (rho < rho_min) {
+                        As = (b * h0) * rho_min;
+                        rho = rho_min;
+                    }
+                }
+
+                // 存储计算得到的As，用于截面配筋图
+                sectionParams = {
+                    b: b,
+                    h: h,
+                    b_f: b_f,
+                    h_f: h_f,
+                    as0: as0,
+                    As: As
+                };
+
+                // 更新输出显示
+                document.getElementById('ls-rein').textContent = ls;
+                document.getElementById('bf-out-rein').textContent = b_f_out.toFixed(1);
+                document.getElementById('h0-rein').textContent = h0.toFixed(1);
+                document.getElementById('alpha-s-rein').textContent = alpha_s.toFixed(3);
+                document.getElementById('xi-rein').textContent = xi.toFixed(3);
+                document.getElementById('x-rein').textContent = x.toFixed(2);
+                document.getElementById('As-rein').textContent = As.toFixed(1);
+                document.getElementById('rho-rein').textContent = rho.toFixed(4);
+
+                // 选择钢筋并显示钢筋选择部分
+                selectRebar(As, b, as0);
+                document.getElementById('rebar-selection').style.display = 'block';
+                document.getElementById('show-section-rein').style.display = 'block';
+
+                alert(`配筋计算已完成！\n截面类型: ${ls}`);
+
+            } catch (error) {
+                alert('计算过程中发生错误: ' + error.message);
+            }
+        }
+
+        // 选择钢筋 - 按照原Python代码逻辑实现
+        function selectRebar(As, b, as0) {
+            console.log(`开始配筋选择，计算面积: ${As} mm²`);
+            
+            // 检查是否需要双层配筋
+            const doubleLayer = as0 > 60;
+            
+            if (doubleLayer) {
+                console.log("采用双层配筋");
+                selectedRebar = selectDoubleLayerRebar(As, b, as0);
+            } else {
+                console.log("采用单层配筋");
+                selectedRebar = selectSingleLayerRebar(As, b, as0);
+            }
+            
+            // 更新显示
+            updateRebarDisplay(As);
+        }
+
+        // 选择单层配筋
+        function selectSingleLayerRebar(As, b, as0) {
+            // 生成所有可能的配筋方案
+            const allOptions = [];
+            
+            // 1. 单一直径配筋方案
+            const singleOptions = generateSingleDiameterOptions(b, as0);
+            allOptions.push(...singleOptions);
+            
+            // 2. 混合直径配筋方案
+            const mixedOptions = generateMixedDiameterOptions(b, as0);
+            allOptions.push(...mixedOptions);
+            
+            console.log(`总方案数: ${allOptions.length} 个`);
+            
+            // 筛选满足面积要求的方案（-5%~20%）
+            const areaOptions = allOptions.filter(opt => {
+                const diffPercent = ((opt.actualArea - As) / As * 100);
+                return -5 <= diffPercent && diffPercent <= 20;
+            });
+            
+            console.log(`满足面积要求的方案: ${areaOptions.length} 个`);
+            
+            // 如果没有满足面积要求的方案，使用所有方案
+            const candidateOptions = areaOptions.length > 0 ? areaOptions : allOptions;
+            
+            // 选择最接近计算面积的方案
+            if (candidateOptions.length > 0) {
+                const bestOption = candidateOptions.reduce((best, current) => {
+                    return Math.abs(current.actualArea - As) < Math.abs(best.actualArea - As) ? current : best;
+                });
+                
+                console.log(`选择最佳方案: 面积 ${bestOption.actualArea.toFixed(1)} mm²`);
+                return bestOption;
+            } else {
+                console.log("没有找到合适方案，使用默认方案");
+                return createDefaultRebarOption(As);
+            }
+        }
+
+        // 生成单一直径配筋方案
+        function generateSingleDiameterOptions(b, as0) {
+            const options = [];
+            const preferredDiameters = [12, 14, 16, 18, 20, 22, 25, 28];
+            
+            for (const diameter of preferredDiameters) {
+                if (!rebarData[diameter]) continue;
+                
+                const singleArea = rebarData[diameter].area;
+                const maxNumber = calculateMaxNumber(diameter, b, as0);
+                
+                for (let number = 2; number <= maxNumber; number++) {
+                    const actualArea = number * singleArea;
+                    
+                    options.push({
+                        diameter: diameter,
+                        number: number,
+                        actualArea: actualArea,
+                        double_layer: false,
+                        mixed_diameter: false
+                    });
+                }
+            }
+            
+            return options;
+        }
+
+        // 生成混合直径配筋方案
+        function generateMixedDiameterOptions(b, as0) {
+            const options = [];
+            const preferredDiameters = [12, 14, 16, 18, 20, 22, 25, 28];
+            
+            for (let i = 0; i < preferredDiameters.length; i++) {
+                const diameter1 = preferredDiameters[i];
+                if (!rebarData[diameter1]) continue;
+                
+                for (let j = i; j < preferredDiameters.length; j++) {
+                    const diameter2 = preferredDiameters[j];
+                    if (!rebarData[diameter2]) continue;
+                    
+                    // 如果直径相同，跳过（这是单一直径情况）
+                    if (diameter1 === diameter2) continue;
+                    
+                    const singleArea1 = rebarData[diameter1].area;
+                    const singleArea2 = rebarData[diameter2].area;
+                    
+                    // 考虑不同的根数组合
+                    const maxTotal = calculateMaxNumber(Math.min(diameter1, diameter2), b, as0);
+                    
+                    for (let num1 = 1; num1 < maxTotal; num1++) {
+                        for (let num2 = 1; num2 < maxTotal - num1 + 1; num2++) {
+                            const totalNumber = num1 + num2;
+                            if (totalNumber < 2) continue;
+                            
+                            const actualArea = num1 * singleArea1 + num2 * singleArea2;
+                            
+                            options.push({
+                                diameter1: diameter1,
+                                number1: num1,
+                                diameter2: diameter2,
+                                number2: num2,
+                                actualArea: actualArea,
+                                double_layer: false,
+                                mixed_diameter: true
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return options;
+        }
+
+        // 选择双层配筋
+        function selectDoubleLayerRebar(As, b, as0) {
+            console.log("开始双层配筋选择");
+            
+            // 生成所有可能的双层配筋方案
+            const allOptions = generateDoubleLayerOptions(As, b, as0);
+            console.log(`生成双层方案: ${allOptions.length} 个`);
+            
+            if (allOptions.length === 0) {
+                console.log("没有生成任何双层配筋方案，使用默认方案");
+                return createDefaultDoubleLayerRebarOption(As);
+            }
+            
+            // 严格筛选：只保留面积在-5%~20%范围内的方案
+            let candidateOptions = allOptions.filter(opt => {
+                const diffPercent = ((opt.actualArea - As) / As * 100);
+                return -5 <= diffPercent && diffPercent <= 20;
+            });
+            
+            console.log(`满足严格条件的方案: ${candidateOptions.length} 个`);
+            
+            // 如果严格条件下没有找到方案，放宽面积要求到-5%~30%
+            if (candidateOptions.length === 0) {
+                console.log("严格条件下无合适方案，放宽面积要求到-5%~30%");
+                candidateOptions = allOptions.filter(opt => {
+                    const diffPercent = ((opt.actualArea - As) / As * 100);
+                    return -5 <= diffPercent && diffPercent <= 30;
+                });
+                
+                console.log(`放宽面积要求后的方案: ${candidateOptions.length} 个`);
+            }
+            
+            // 选择最接近计算面积的方案
+            if (candidateOptions.length > 0) {
+                const bestOption = candidateOptions.reduce((best, current) => {
+                    return Math.abs(current.actualArea - As) < Math.abs(best.actualArea - As) ? current : best;
+                });
+                
+                console.log(`选择最佳方案: 总面积 ${bestOption.actualArea.toFixed(1)} mm²`);
+                console.log(`下层: ${bestOption.diameter_lower}mm×${bestOption.number_lower}根`);
+                console.log(`上层: ${bestOption.diameter_upper}mm×${bestOption.number_upper}根`);
+                
+                return bestOption;
+            } else {
+                console.log("没有找到合适方案，使用默认方案");
+                return createDefaultDoubleLayerRebarOption(As);
+            }
+        }
+
+        // 生成双层配筋方案
+        function generateDoubleLayerOptions(As, b, as0) {
+            const options = [];
+            const preferredDiameters = [12, 14, 16, 18, 20, 22, 25, 28];
+            
+            // 遍历所有可能的上下层直径组合，确保下层直径大于上层
+            for (let i = 0; i < preferredDiameters.length; i++) {
+                const diameterLower = preferredDiameters[i];
+                if (!rebarData[diameterLower]) continue;
+                
+                // 只考虑直径小于下层直径的钢筋作为上层钢筋
+                for (let j = 0; j < i; j++) {
+                    const diameterUpper = preferredDiameters[j];
+                    if (!rebarData[diameterUpper]) continue;
+                    
+                    const singleAreaLower = rebarData[diameterLower].area;
+                    const singleAreaUpper = rebarData[diameterUpper].area;
+                    
+                    // 计算最大根数
+                    const maxNumberLower = calculateMaxNumber(diameterLower, b, as0);
+                    const maxNumberUpper = calculateMaxNumber(diameterUpper, b, as0);
+                    
+                    // 遍历所有可能的根数组合，每层至少2根，且下层根数多于上层
+                    for (let numberLower = 2; numberLower <= maxNumberLower; numberLower++) {
+                        for (let numberUpper = 2; numberUpper <= Math.min(numberLower - 1, maxNumberUpper); numberUpper++) {
+                            // 计算实际配筋面积
+                            const actualAreaLower = numberLower * singleAreaLower;
+                            const actualAreaUpper = numberUpper * singleAreaUpper;
+                            const actualArea = actualAreaLower + actualAreaUpper;
+                            
+                            options.push({
+                                diameter_lower: diameterLower,
+                                number_lower: numberLower,
+                                diameter_upper: diameterUpper,
+                                number_upper: numberUpper,
+                                actualArea: actualArea,
+                                double_layer: true,
+                                mixed_diameter: false
+                            });
+                        }
+                    }
+                }
+            }
+            
+            console.log(`生成双层配筋方案: ${options.length} 个`);
+            return options;
+        }
+
+        // 计算最大可能的钢筋根数
+        function calculateMaxNumber(diameter, b, as0) {
+            const availableWidth = b - 2 * (as0 - 35);
+            const minSpacing = 25;
+            
+            const maxNumber = Math.floor((availableWidth + minSpacing) / (diameter + minSpacing));
+            return Math.min(Math.max(maxNumber, 2), 8); // 限制在2-8根之间
+        }
+
+        // 创建默认单层配筋方案
+        function createDefaultRebarOption(As) {
+            const diameter = 16;
+            const singleArea = rebarData[diameter].area;
+            const number = Math.max(2, Math.ceil(As / singleArea));
+            const actualArea = number * singleArea;
+            
+            return {
+                diameter: diameter,
+                number: number,
+                actualArea: actualArea,
+                double_layer: false,
+                mixed_diameter: false
+            };
+        }
+
+        // 创建默认双层配筋方案
+        function createDefaultDoubleLayerRebarOption(As) {
+            const diameterLower = 20;
+            const diameterUpper = 16;
+            
+            const singleAreaLower = rebarData[diameterLower].area;
+            const singleAreaUpper = rebarData[diameterUpper].area;
+            
+            // 计算需要的根数，确保下层根数多于上层
+            const totalNumber = Math.max(5, Math.ceil(As / ((singleAreaLower + singleAreaUpper) / 2)));
+            let numberLower = Math.ceil(totalNumber * 0.6);
+            let numberUpper = totalNumber - numberLower;
+            
+            // 确保每层至少2根，且下层根数多于上层
+            numberLower = Math.max(3, numberLower);
+            numberUpper = Math.max(2, numberUpper);
+            
+            // 确保下层根数多于上层
+            if (numberLower <= numberUpper) {
+                numberLower = numberUpper + 1;
+            }
+            
+            const actualAreaLower = numberLower * singleAreaLower;
+            const actualAreaUpper = numberUpper * singleAreaUpper;
+            const actualArea = actualAreaLower + actualAreaUpper;
+            
+            return {
+                diameter_lower: diameterLower,
+                number_lower: numberLower,
+                diameter_upper: diameterUpper,
+                number_upper: numberUpper,
+                actualArea: actualArea,
+                double_layer: true,
+                mixed_diameter: false
+            };
+        }
+
+        // 更新钢筋显示
+        function updateRebarDisplay(As) {
+            // 更新钢筋信息显示
+            document.getElementById('selected-rebar-text').textContent = getRebarText();
+            document.getElementById('actual-area').textContent = selectedRebar.actualArea.toFixed(1);
+            document.getElementById('calc-area').textContent = As.toFixed(1);
+            
+            // 计算差值
+            const diff = selectedRebar.actualArea - As;
+            const diffPercent = (diff / As * 100).toFixed(1);
+            document.getElementById('area-diff').textContent = `${diff.toFixed(1)} mm² (${diffPercent}%)`;
+            
+            // 计算最小净间距
+            const minSpacing = calculateMinSpacing();
+            document.getElementById('min-spacing').textContent = minSpacing.toFixed(1);
+            
+            // 配筋方式
+            document.getElementById('layer-type').textContent = getLayerText();
+            
+            // 检查结果
+            const spacingOk = minSpacing >= 25;
+            document.getElementById('spacing-check').textContent = spacingOk ? "满足要求" : "不满足要求";
+            document.getElementById('spacing-check').style.color = spacingOk ? "green" : "red";
+            
+            const areaOk = -5 <= diffPercent && diffPercent <= 20;
+            document.getElementById('area-check').textContent = areaOk ? "满足要求" : "不满足要求";
+            document.getElementById('area-check').style.color = areaOk ? "green" : "red";
+            
+            // 更新钢筋数据表
+            updateRebarTable();
+        }
+
+        // 获取钢筋文本描述
+        function getRebarText() {
+            if (selectedRebar.mixed_diameter) {
+                return `${selectedRebar.diameter1}mm × ${selectedRebar.number1}根 + ${selectedRebar.diameter2}mm × ${selectedRebar.number2}根`;
+            } else if (selectedRebar.double_layer) {
+                const lowerText = `${selectedRebar.diameter_lower}mm × ${selectedRebar.number_lower}根`;
+                const upperText = `${selectedRebar.diameter_upper}mm × ${selectedRebar.number_upper}根`;
+                return `下层: ${lowerText}  上层: ${upperText}`;
+            } else {
+                return `${selectedRebar.diameter}mm × ${selectedRebar.number}根`;
+            }
+        }
+
+        // 获取配筋方式文本
+        function getLayerText() {
+            if (selectedRebar.mixed_diameter) {
+                return "单层混合直径配筋";
+            } else if (selectedRebar.double_layer) {
+                return "双层单一直径配筋";
+            } else {
+                return "单层单一直径配筋";
+            }
+        }
+
+        // 计算最小净间距
+        function calculateMinSpacing() {
+            if (selectedRebar.double_layer) {
+                // 双层配筋，计算上下层的最小间距
+                const spacingLower = calculateSpacingForRebar(
+                    selectedRebar.diameter_lower, 
+                    selectedRebar.number_lower, 
+                    sectionParams.b, 
+                    sectionParams.as0
+                );
+                const spacingUpper = calculateSpacingForRebar(
+                    selectedRebar.diameter_upper, 
+                    selectedRebar.number_upper, 
+                    sectionParams.b, 
+                    sectionParams.as0
+                );
+                return Math.min(spacingLower, spacingUpper);
+            } else if (selectedRebar.mixed_diameter) {
+                // 混合直径配筋，使用平均直径计算
+                const totalNumber = selectedRebar.number1 + selectedRebar.number2;
+                const totalDiameter = selectedRebar.number1 * selectedRebar.diameter1 + 
+                                      selectedRebar.number2 * selectedRebar.diameter2;
+                const avgDiameter = totalDiameter / totalNumber;
+                return calculateSpacingForRebar(avgDiameter, totalNumber, sectionParams.b, sectionParams.as0);
+            } else {
+                // 单一直径配筋
+                return calculateSpacingForRebar(selectedRebar.diameter, selectedRebar.number, sectionParams.b, sectionParams.as0);
+            }
+        }
+
+        // 计算钢筋净间距
+        function calculateSpacingForRebar(diameter, number, b, as0) {
+            if (number <= 1) return 999;
+            
+            const totalWidth = b - 2 * (as0 - 35);
+            const rebarTotalDiameter = number * diameter;
+            const spacing = (totalWidth - rebarTotalDiameter) / (number - 1);
+            
+            return spacing;
+        }
+
+        // 更新钢筋数据表
+        function updateRebarTable() {
+            const tableBody = document.querySelector('#rebar-table tbody');
+            tableBody.innerHTML = '';
+            
+            const diameters = Object.keys(rebarData).map(Number).sort((a, b) => a - b);
+            
+            for (const diameter of diameters) {
+                const data = rebarData[diameter];
+                const row = document.createElement('tr');
+                
+                // 标记当前选择的钢筋
+                let isSelected = false;
+                if (selectedRebar.mixed_diameter) {
+                    isSelected = diameter === selectedRebar.diameter1 || diameter === selectedRebar.diameter2;
+                } else if (selectedRebar.double_layer) {
+                    isSelected = diameter === selectedRebar.diameter_lower || diameter === selectedRebar.diameter_upper;
+                } else {
+                    isSelected = diameter === selectedRebar.diameter;
+                }
+                
+                if (isSelected) {
+                    row.classList.add('selected-rebar');
+                }
+                
+                row.innerHTML = `
+                    <td>${diameter}</td>
+                    <td>${data.area}</td>
+                    <td>${isSelected ? '✓' : ''}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+        }
+
+        // 承载力复核功能
+        document.getElementById('check-capacity').addEventListener('click', checkCapacity);
+
+        function checkCapacity() {
+            try {
+                // 获取输入值
+                const b = parseFloat(document.getElementById('b-cap').value) || 0;
+                const h = parseFloat(document.getElementById('h-cap').value) || 0;
+                const b_f = parseFloat(document.getElementById('bf-cap').value) || 0;
+                const h_f = parseFloat(document.getElementById('hf-cap').value) || 0;
+                const gam = parseFloat(document.getElementById('gam-cap').value) || 1.0;
+                const M = parseFloat(document.getElementById('M-cap').value) || 0;
+                const as_val = parseFloat(document.getElementById('as-cap').value) || 0;
+                const As = parseFloat(document.getElementById('As-cap').value) || 0;
+                const L0 = parseFloat(document.getElementById('l0-cap').value) || 6000;
+
+                // 检查输入完整性
+                if (!b || !h || !b_f || !h_f || !M || !as_val || !As) {
+                    alert('请填写所有必填参数');
+                    return;
+                }
+
+                // 计算h0 = h - as_val
+                const h0 = h - as_val;
+
+                // 确定翼缘宽度
+                const ratio = h_f / h0;
+                let b_f1;
+
+                if (ratio >= 0.1) {
+                    b_f1 = b + 12 * h_f;
+                } else if (ratio >= 0.05) {
+                    b_f1 = b + 6 * h_f;
+                } else {
+                    b_f1 = b;
+                }
+
+                // 计算b_f2
+                const b_f2 = L0 / 3;
+
+                // 取b_f, b_f1, b_f2中最小的值作为b_f0
+                const b_f0 = Math.min(b_f, b_f1, b_f2);
+                const b_f_out = b_f0; // 输出翼缘宽度
+
+                // 判断T形梁截面类型
+                const fy_As = currentFy * As;
+                const fc_b_f0_h_f = currentFc * b_f0 * h_f;
+
+                let ls, x, xi, alpha_s, Mu, safety;
+
+                // 比较大小
+                if (fy_As <= fc_b_f0_h_f) {
+                    // 第一种T形截面（受压区高度在翼缘内）
+                    ls = "第一种T形截面";
+                    x = fy_As / (currentFc * b_f0);
+                    xi = x / h0;
+                    alpha_s = xi * (1 - 0.5 * xi);
+                    Mu = currentFc * b_f0 * x * (h0 - 0.5 * x) / 1e6; // 转换为kN·m
+
+                    // 比较Mu/gam与M
+                    if (Mu / gam > M) {
+                        safety = "截面安全！";
+                    } else {
+                        safety = "截面不安全！";
+                    }
+                } else {
+                    // 第二种T形截面（受压区高度进入腹板）
+                    ls = "第二种T形截面";
+                    xi = (fy_As - currentFc * (b_f0 - b) * h_f) / (currentFc * b * h0);
+                    if (xi > currentXib) {
+                        xi = currentXib; // 如果xi大于xi_b，则取xi_b
+                    }
+                    alpha_s = xi * (1 - 0.5 * xi);
+                    x = xi * h0;
+                    Mu = (alpha_s * currentFc * b * h0 * h0 + currentFc * (b_f0 - b) * h_f * (h0 - 0.5 * h_f)) / 1e6; // 转换为kN·m
+
+                    // 比较Mu/gam与M
+                    if (Mu / gam > M) {
+                        safety = "截面安全！";
+                    } else {
+                        safety = "截面不安全！";
+                    }
+                }
+
+                // 更新输出显示
+                document.getElementById('ls-cap').textContent = ls;
+                document.getElementById('bf-out-cap').textContent = b_f_out.toFixed(1);
+                document.getElementById('h0-cap').textContent = h0.toFixed(1);
+                document.getElementById('alpha-s-cap').textContent = alpha_s.toFixed(3);
+                document.getElementById('xi-cap').textContent = xi.toFixed(3);
+                document.getElementById('x-cap').textContent = x.toFixed(1);
+                document.getElementById('Mu-cap').textContent = Mu.toFixed(2);
+
+                // 更新安全性显示
+                const safetyElement = document.getElementById('safety-result');
+                safetyElement.textContent = `截面安全性复核结果: ${safety}`;
+                safetyElement.className = `safety-result ${safety.includes('安全') ? 'safe' : 'unsafe'}`;
+
+                alert(`承载力复核已完成！\n截面类型: ${ls}\n安全性: ${safety}`);
+
+            } catch (error) {
+                alert('计算过程中发生错误: ' + error.message);
+            }
+        }
+
+        // 显示截面配筋图
+        document.getElementById('show-section-rein').addEventListener('click', () => drawSection('rein'));
+
+        function drawSection(type) {
+            const canvasId = `section-canvas-${type}`;
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 设置绘图参数
+            const b = sectionParams.b;
+            const h = sectionParams.h;
+            const b_f = sectionParams.b_f;
+            const h_f = sectionParams.h_f;
+            const as0 = sectionParams.as0;
+            
+            // 计算缩放比例
+            const scaleX = canvas.width * 0.6 / Math.max(b_f, b);
+            const scaleY = canvas.height * 0.5 / h;
+            const scale = Math.min(scaleX, scaleY, 1.5);
+            
+            // 计算绘图起始位置
+            const drawingWidth = Math.max(b_f, b) * scale;
+            const drawingHeight = h * scale;
+            const startX = (canvas.width - drawingWidth) / 2;
+            const startY = (canvas.height - drawingHeight) / 2 + 60;
+            
+            // 绘制T形梁截面
+            ctx.fillStyle = '#ddd';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            
+            // 绘制腹板
+            const webX = startX + (b_f - b) * scale / 2;
+            const webY = startY + h_f * scale;
+            const webHeight = (h - h_f) * scale;
+            
+            ctx.fillRect(webX, webY, b * scale, webHeight);
+            ctx.strokeRect(webX, webY, b * scale, webHeight);
+            
+            // 绘制翼缘
+            ctx.fillRect(startX, startY, b_f * scale, h_f * scale);
+            ctx.strokeRect(startX, startY, b_f * scale, h_f * scale);
+            
+            // 绘制标题
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('T形梁截面配筋图', canvas.width / 2, startY - 30);
+            
+            // 绘制配筋信息
+            const rebarText = getRebarText();
+            ctx.font = '16px Arial';
+            ctx.fillText(rebarText, canvas.width / 2, startY + drawingHeight + 40);
+            
+            // 根据配筋类型绘制钢筋
+            if (selectedRebar.mixed_diameter) {
+                drawMixedDiameterRebar(ctx, startX, startY, webX, scale);
+            } else if (selectedRebar.double_layer) {
+                drawDoubleLayerRebar(ctx, startX, startY, webX, scale);
+            } else {
+                drawSingleLayerRebar(ctx, startX, startY, webX, scale);
+            }
+        }
+
+        // 绘制单层钢筋
+        function drawSingleLayerRebar(ctx, startX, startY, webX, scale) {
+            const diameter = selectedRebar.diameter;
+            const number = selectedRebar.number;
+            
+            const barRadius = Math.max(3, diameter * scale / 4);
+            const barY = startY + sectionParams.h * scale - sectionParams.as0 * scale - barRadius;
+            
+            const totalWidth = sectionParams.b * scale;
+            const rebarTotalWidth = number * diameter * scale;
+            const spacing = (totalWidth - rebarTotalWidth) / (number + 1);
+            
+            // 设置钢筋为黑色
+            ctx.fillStyle = '#000';
+            
+            // 对称分布：计算第一个钢筋的位置
+            const firstBarX = webX + spacing + barRadius;
+            
+            for (let i = 0; i < number; i++) {
+                const barX = firstBarX + i * (diameter * scale + spacing);
+                ctx.beginPath();
+                ctx.arc(barX, barY, barRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 绘制混合直径钢筋
+        function drawMixedDiameterRebar(ctx, startX, startY, webX, scale) {
+            const diameter1 = selectedRebar.diameter1;
+            const number1 = selectedRebar.number1;
+            const diameter2 = selectedRebar.diameter2;
+            const number2 = selectedRebar.number2;
+            
+            const barRadius1 = Math.max(3, diameter1 * scale / 4);
+            const barRadius2 = Math.max(3, diameter2 * scale / 4);
+            const barY = startY + sectionParams.h * scale - sectionParams.as0 * scale;
+            
+            const totalNumber = number1 + number2;
+            
+            // 计算平均直径用于间距计算
+            const totalDiameter = number1 * diameter1 + number2 * diameter2;
+            const avgDiameter = totalDiameter / totalNumber;
+            
+            const totalWidth = sectionParams.b * scale;
+            const rebarTotalWidth = totalNumber * avgDiameter * scale;
+            const spacing = (totalWidth - rebarTotalWidth) / (totalNumber + 1);
+            
+            // 设置钢筋为黑色
+            ctx.fillStyle = '#000';
+            
+            // 计算第一个钢筋的位置（对称分布）
+            const firstBarX = webX + spacing + barRadius1;
+            
+            // 确定哪种直径的钢筋数量是单数
+            if (number1 % 2 === 1) {
+                // 第一种直径是单数，将单数根的钢筋放在中间位置
+                const middleIndex = Math.floor(totalNumber / 2);
+                
+                let currentIndex = 0;
+                for (let i = 0; i < totalNumber; i++) {
+                    const barX = firstBarX + i * (avgDiameter * scale + spacing);
+                    
+                    if (i === middleIndex) {
+                        // 中间位置放置直径1的钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius1, barRadius1, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (currentIndex < number1 - 1) {
+                        // 在中间位置两侧对称放置剩余的直径1钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius1, barRadius1, 0, Math.PI * 2);
+                        ctx.fill();
+                        currentIndex++;
+                    } else {
+                        // 放置直径2的钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius2, barRadius2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (number2 % 2 === 1) {
+                // 第二种直径是单数，将单数根的钢筋放在中间位置
+                const middleIndex = Math.floor(totalNumber / 2);
+                
+                let currentIndex1 = 0;
+                let currentIndex2 = 0;
+                for (let i = 0; i < totalNumber; i++) {
+                    const barX = firstBarX + i * (avgDiameter * scale + spacing);
+                    
+                    if (i === middleIndex) {
+                        // 中间位置放置直径2的钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius2, barRadius2, 0, Math.PI * 2);
+                        ctx.fill();
+                        currentIndex2++;
+                    } else if (currentIndex1 < number1) {
+                        // 直径1的钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius1, barRadius1, 0, Math.PI * 2);
+                        ctx.fill();
+                        currentIndex1++;
+                    } else if (currentIndex2 < number2 - 1) {
+                        // 剩下的直径2钢筋
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius2, barRadius2, 0, Math.PI * 2);
+                        ctx.fill();
+                        currentIndex2++;
+                    }
+                }
+            } else {
+                // 如果都是双数，按顺序绘制
+                let currentIndex = 0;
+                for (let i = 0; i < totalNumber; i++) {
+                    const barX = firstBarX + i * (avgDiameter * scale + spacing);
+                    
+                    if (currentIndex < number1) {
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius1, barRadius1, 0, Math.PI * 2);
+                        ctx.fill();
+                        currentIndex++;
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(barX, barY - barRadius2, barRadius2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        // 绘制双层钢筋
+        function drawDoubleLayerRebar(ctx, startX, startY, webX, scale) {
+            // 设置钢筋为黑色
+            ctx.fillStyle = '#000';
+            
+            // 下层钢筋
+            const diameterLower = selectedRebar.diameter_lower;
+            const numberLower = selectedRebar.number_lower;
+            
+            const barRadiusLower = Math.max(3, diameterLower * scale / 4);
+            const barYLower = startY + sectionParams.h * scale - sectionParams.as0 * scale - barRadiusLower;
+            
+            const totalWidth = sectionParams.b * scale;
+            const rebarTotalWidthLower = numberLower * diameterLower * scale;
+            const spacingLower = (totalWidth - rebarTotalWidthLower) / (numberLower + 1);
+            
+            // 对称分布：计算第一个下层钢筋的位置
+            const firstBarXLower = webX + spacingLower + barRadiusLower;
+            
+            // 绘制下层钢筋
+            for (let i = 0; i < numberLower; i++) {
+                const barX = firstBarXLower + i * (diameterLower * scale + spacingLower);
+                ctx.beginPath();
+                ctx.arc(barX, barYLower, barRadiusLower, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 上层钢筋
+            const diameterUpper = selectedRebar.diameter_upper;
+            const numberUpper = selectedRebar.number_upper;
+            
+            const barRadiusUpper = Math.max(3, diameterUpper * scale / 4);
+            const barYUpper = barYLower - 25 * scale - barRadiusLower - barRadiusUpper;
+            
+            const rebarTotalWidthUpper = numberUpper * diameterUpper * scale;
+            const spacingUpper = (totalWidth - rebarTotalWidthUpper) / (numberUpper + 1);
+            
+            // 对称分布：计算第一个上层钢筋的位置
+            const firstBarXUpper = webX + spacingUpper + barRadiusUpper;
+            
+            // 绘制上层钢筋
+            for (let i = 0; i < numberUpper; i++) {
+                const barX = firstBarXUpper + i * (diameterUpper * scale + spacingUpper);
+                ctx.beginPath();
+                ctx.arc(barX, barYUpper, barRadiusUpper, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 初始化时更新钢筋数据表
+        window.addEventListener('load', () => {
+            updateRebarTable();
+        });
+    </script>
+</body>
+</html>
